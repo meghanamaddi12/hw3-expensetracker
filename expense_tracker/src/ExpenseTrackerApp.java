@@ -5,25 +5,38 @@ import view.ExpenseTrackerView;
 import model.Filter.AmountFilter;
 import model.Filter.CategoryFilter;
 
+/**
+ * Main entry point for the Expense Tracker application.
+ *
+ * <p>Initializes the MVC components and sets up action listeners
+ * for user interaction with the GUI.
+ */
 public class ExpenseTrackerApp {
 
-  /**
-   * @param args
-   */
+    /**
+     * Launches the Expense Tracker application.
+     *
+     * @param args command-line arguments (not used)
+     */
   public static void main(String[] args) {
-    
-    // Create MVC components
-    ExpenseTrackerModel model = new ExpenseTrackerModel();
-    ExpenseTrackerView view = new ExpenseTrackerView();
-    ExpenseTrackerController controller = new ExpenseTrackerController(model, view);
-    
-
-    // Initialize view
-    view.setVisible(true);
 
 
+      ExpenseTrackerModel model = new ExpenseTrackerModel();
+      ExpenseTrackerController controller = new ExpenseTrackerController(model);
+      ExpenseTrackerView view = new ExpenseTrackerView(controller);
+      controller.setView(view);
+      view.setVisible(true);
 
-    // Handle add transaction button clicks
+      // Add listener for "Remove Selected Transaction" button
+      view.addRemoveSelectedListener(e -> {
+          int selectedRow = view.getTransactionsTable().getSelectedRow();
+          controller.removeTransactionAt(selectedRow);
+      });
+
+
+
+
+      // Handle add transaction button clicks
     view.getAddTransactionBtn().addActionListener(e -> {
       // Get transaction data from view
       double amount = view.getAmountField();
@@ -74,6 +87,17 @@ public class ExpenseTrackerApp {
      controller.setFilter(null);
      controller.applyFilter();
    });
-    
+      // Add action listener to the "Undo Last Transaction" button
+      view.addUndoListener(e -> {
+          controller.undoLastTransaction();
+      });
+
   }
+    /**
+     * Default constructor. Not used — all logic is in the static main method.
+     */
+    public ExpenseTrackerApp() {
+        // No initialization required
+    }
+
 }
