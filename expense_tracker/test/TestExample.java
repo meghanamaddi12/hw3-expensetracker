@@ -28,9 +28,11 @@ public class TestExample {
     @Before
     public void setup() {
         model = new ExpenseTrackerModel();
-        view = new ExpenseTrackerView();
-        controller = new ExpenseTrackerController(model, view);
+        controller = new ExpenseTrackerController(model);
+        view = new ExpenseTrackerView(controller);  // pass initialized controller
+        controller.setView(view);
     }
+
     /**
      * Calculates the total cost of all transactions in the model.
      *
@@ -77,7 +79,7 @@ public class TestExample {
         assertEquals(0, model.getTransactions().size());
 
         // Perform the action: Add and remove a transaction
-        Transaction addedTransaction = new Transaction(50.00, "Groceries");
+        Transaction addedTransaction = new Transaction(50.00, "food");
         model.addTransaction(addedTransaction);
 
         // Pre-condition: List of transactions contains one transaction
@@ -94,9 +96,34 @@ public class TestExample {
         System.out.println("Transaction removed. Remaining transactions: " + transactions.size());
         System.out.println("Total cost after removal: " + getTotalCost());
 
-        // Check the total cost after removing the transaction
-        double totalCost = getTotalCost();
-        assertEquals(0.00, totalCost, 0.01);
+        assertEquals(0.00, getTotalCost(), 0.01);
+
+
     }
+    /**
+     * Tests removing a transaction that does NOT exist in the model.
+     * Ensures it does not affect the existing list or throw an error.
+     */
+    @Test
+    public void testRemoveTransactionNotInList() {
+        // Setup: Add one transaction
+        Transaction existingTransaction = new Transaction(100.0, "food");
+        model.addTransaction(existingTransaction);
+        assertEquals(1, model.getTransactions().size());
+
+        // Create a different transaction that was never added
+        Transaction notInList = new Transaction(200.0, "travel");
+
+        // Execute: Try to remove the non-existent transaction
+        model.removeTransaction(notInList);
+
+        // Validate: Model size remains unchanged, original transaction remains
+        List<Transaction> transactions = model.getTransactions();
+        assertEquals(1, transactions.size());
+        assertTrue(transactions.contains(existingTransaction));
+
+        // Print info
+        System.out.println("Tried removing a transaction NOT in list. No effect. Size: " + transactions.size());
+}
 
 }
